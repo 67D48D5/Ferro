@@ -7,5 +7,5 @@ mod value_objects;
 
 // Re-exports
 pub use aggregate::User;
-pub use repository::UserRepository;
-pub use value_objects::{Email, PasswordHash};
+pub use repository::{PasswordHasher, UserRepository};
+pub use value_objects::{Email, PasswordHash, PlainPassword};
