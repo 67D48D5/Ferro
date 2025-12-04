@@ -4,3 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+domain = { path = "../domain" }
+
+# Async
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+
+# UUID
+uuid = { workspace = true }
