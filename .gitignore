@@ -28,3 +28,7 @@ Cargo.lock
 
 # macOS Resource Fork
 .DS_Store
+
+# Environment variables (contains secrets)
+.env
+
