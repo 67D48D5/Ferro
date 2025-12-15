@@ -273,9 +273,11 @@ List all posts with pagination.
       "updated_at": "ISO8601 timestamp"
     }
   ],
-  "total": 10
+  "count": 10
 }
 ```
+
+**Note:** `count` represents the number of posts returned in the current page, not the total number of posts in the database.
 
 **Example:**
 ```bash
@@ -379,9 +381,11 @@ List all comments for a post with pagination.
       "created_at": "ISO8601 timestamp"
     }
   ],
-  "total": 5
+  "count": 5
 }
 ```
+
+**Note:** `count` represents the number of comments returned in the current page, not the total number of comments for the post.
 
 **Example:**
 ```bash

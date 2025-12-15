@@ -8,24 +8,12 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use serde::Deserialize;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
+use super::common::PaginationParams;
 use super::error_response::AppError;
 use crate::{middleware::AuthUser, AppState};
-
-#[derive(Debug, Deserialize)]
-pub struct PaginationParams {
-    #[serde(default = "default_limit")]
-    pub limit: i64,
-    #[serde(default)]
-    pub offset: i64,
-}
-
-fn default_limit() -> i64 {
-    50
-}
 
 /// Create a new comment on a post
 pub async fn create_comment_handler(

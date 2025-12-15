@@ -179,7 +179,7 @@ Response:
 ```json
 {
   "posts": [...],
-  "total": 10
+  "count": 10
 }
 ```
 
@@ -218,7 +218,7 @@ Response:
 ```json
 {
   "comments": [...],
-  "total": 5
+  "count": 5
 }
 ```
 

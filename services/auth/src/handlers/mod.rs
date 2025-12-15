@@ -2,6 +2,7 @@
 
 mod auth_handlers;
 mod comment_handlers;
+mod common;
 mod error_response;
 mod post_handlers;
 

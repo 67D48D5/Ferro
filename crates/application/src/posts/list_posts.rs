@@ -22,7 +22,7 @@ where
 
     pub async fn execute(&self, limit: i64, offset: i64) -> Result<ListPostsResponse, DomainError> {
         let posts = self.post_repository.find_all(limit, offset).await?;
-        let total = posts.len();
+        let count = posts.len();
 
         let posts = posts
             .into_iter()
@@ -36,6 +36,6 @@ where
             })
             .collect();
 
-        Ok(ListPostsResponse { posts, total })
+        Ok(ListPostsResponse { posts, count })
     }
 }

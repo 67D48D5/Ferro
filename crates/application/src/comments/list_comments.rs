@@ -23,7 +23,7 @@ where
 
     pub async fn execute(&self, post_id: Uuid, limit: i64, offset: i64) -> Result<ListCommentsResponse, DomainError> {
         let comments = self.comment_repository.find_by_post(post_id, limit, offset).await?;
-        let total = comments.len();
+        let count = comments.len();
 
         let comments = comments
             .into_iter()
@@ -36,6 +36,6 @@ where
             })
             .collect();
 
-        Ok(ListCommentsResponse { comments, total })
+        Ok(ListCommentsResponse { comments, count })
     }
 }

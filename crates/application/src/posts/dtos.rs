@@ -23,5 +23,5 @@ pub struct PostResponse {
 #[derive(Debug, Serialize)]
 pub struct ListPostsResponse {
     pub posts: Vec<PostResponse>,
-    pub total: usize,
+    pub count: usize,
 }
