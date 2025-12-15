@@ -4,7 +4,7 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
     extract::State,
-    http::{header::AUTHORIZATION, HeaderMap, StatusCode},
+    http::{header::AUTHORIZATION, HeaderMap},
     response::{Html, IntoResponse},
     Extension,
 };
@@ -46,9 +46,4 @@ pub async fn graphql_handler(
 /// GraphQL Playground handler (for development)
 pub async fn graphql_playground() -> impl IntoResponse {
     Html(playground_source(GraphQLPlaygroundConfig::new("/graphql")))
-}
-
-/// Health check for GraphQL endpoint
-pub async fn graphql_health() -> impl IntoResponse {
-    (StatusCode::OK, "GraphQL endpoint is healthy")
 }
