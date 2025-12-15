@@ -35,3 +35,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # UUID
 uuid = { workspace = true }
+
+# GraphQL
+async-graphql = "7.0"
+async-graphql-axum = "7.0"
