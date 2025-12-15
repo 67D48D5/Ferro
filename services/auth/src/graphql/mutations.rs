@@ -96,7 +96,7 @@ impl MutationRoot {
     async fn create_comment(
         &self,
         ctx: &Context<'_>,
-        post_id: String,
+        #[graphql(name = "post_id")] post_id: String,
         content: String,
     ) -> Result<Comment> {
         let state = ctx.data::<AppState>()?;

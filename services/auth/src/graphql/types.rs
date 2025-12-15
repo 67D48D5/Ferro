@@ -29,8 +29,11 @@ pub struct Post {
     pub id: String,
     pub title: String,
     pub content: String,
+    #[graphql(name = "author_id")]
     pub author_id: String,
+    #[graphql(name = "created_at")]
     pub created_at: String,
+    #[graphql(name = "updated_at")]
     pub updated_at: String,
     #[graphql(skip)]
     pub _comments: (),
@@ -51,14 +54,18 @@ impl Post {
 pub struct Comment {
     pub id: String,
     pub content: String,
+    #[graphql(name = "post_id")]
     pub post_id: String,
+    #[graphql(name = "author_id")]
     pub author_id: String,
+    #[graphql(name = "created_at")]
     pub created_at: String,
 }
 
 /// Response for register and login mutations
 #[derive(SimpleObject, Clone)]
 pub struct AuthResponse {
+    #[graphql(name = "user_id")]
     pub user_id: String,
     pub email: String,
     pub token: String,

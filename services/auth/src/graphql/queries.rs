@@ -79,7 +79,7 @@ impl QueryRoot {
     async fn comments(
         &self,
         ctx: &Context<'_>,
-        post_id: String,
+        #[graphql(name = "post_id")] post_id: String,
         #[graphql(default = 50)] limit: i32,
         #[graphql(default = 0)] offset: i32,
     ) -> Result<CommentsResponse> {

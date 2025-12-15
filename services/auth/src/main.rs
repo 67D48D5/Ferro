@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
     // Build router with protected routes
     let protected_routes = Router::new()
         .route("/api/posts", post(create_post_handler))
-        .route("/api/posts/:post_id/comments", post(create_comment_handler))
+        .route("/api/posts/{post_id}/comments", post(create_comment_handler))
         .route_layer(axum_middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -101,8 +101,8 @@ async fn main() -> Result<()> {
         .route("/api/auth/register", post(register_handler))
         .route("/api/auth/login", post(login_handler))
         .route("/api/posts", get(list_posts_handler))
-        .route("/api/posts/:post_id", get(get_post_handler))
-        .route("/api/posts/:post_id/comments", get(list_comments_handler))
+        .route("/api/posts/{post_id}", get(get_post_handler))
+        .route("/api/posts/{post_id}/comments", get(list_comments_handler))
         // GraphQL endpoints
         .route("/graphql", post(graphql_handler))
         .route("/graphql/playground", get(graphql_playground))
