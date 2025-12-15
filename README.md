@@ -6,8 +6,10 @@ A generic, high-performance backend server framework written in Rust.
 
 - **Domain-Driven Design (DDD) Architecture**: Clean separation of concerns with Domain, Application, Infrastructure, and Service layers
 - **Production-Ready Authentication**: Secure user authentication with Argon2 password hashing and JWT tokens
+- **Posting and Comment System**: Full-featured blog/forum-style posting with threaded comments
 - **Type-Safe Database Operations**: PostgreSQL integration with SQLx
 - **RESTful API**: Built with Axum web framework
+- **JWT Authentication Middleware**: Secure protected endpoints
 - **Comprehensive Logging**: Structured logging with Tracing
 - **Async/Await**: Fully async runtime with Tokio
 
@@ -16,11 +18,11 @@ A generic, high-performance backend server framework written in Rust.
 ```
 ferro/
 ├── crates/
-│   ├── domain/           # Core business logic and entities
+│   ├── domain/           # Core business logic and entities (User, Post, Comment)
 │   ├── application/      # Use cases and application services
 │   └── infrastructure/   # External services (database, security)
 ├── services/
-│   └── auth/            # Authentication service (HTTP API)
+│   └── auth/            # HTTP API service
 └── migrations/          # Database migrations
 ```
 
@@ -77,7 +79,9 @@ The server will start on `http://localhost:8080`
 
 ## API Endpoints
 
-### Health Check
+### Authentication
+
+#### Health Check
 
 ```bash
 GET /health
@@ -90,7 +94,7 @@ Response:
 }
 ```
 
-### Register User
+#### Register User
 
 ```bash
 POST /api/auth/register
@@ -111,7 +115,7 @@ Response (201 Created):
 }
 ```
 
-### Login User
+#### Login User
 
 ```bash
 POST /api/auth/login
@@ -129,6 +133,92 @@ Response (200 OK):
   "user_id": "550e8400-e29b-41d4-a716-446655440000",
   "email": "user@example.com",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Posts
+
+#### Create Post (Requires Authentication)
+
+```bash
+POST /api/posts
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "My First Post",
+  "content": "This is the content of my first post"
+}
+```
+
+Response (201 Created):
+```json
+{
+  "id": "post-uuid",
+  "title": "My First Post",
+  "content": "This is the content of my first post",
+  "author_id": "user-uuid",
+  "created_at": "2024-01-01T00:00:00Z",
+  "updated_at": "2024-01-01T00:00:00Z"
+}
+```
+
+#### Get Post
+
+```bash
+GET /api/posts/:post_id
+```
+
+#### List Posts
+
+```bash
+GET /api/posts?limit=20&offset=0
+```
+
+Response:
+```json
+{
+  "posts": [...],
+  "count": 10
+}
+```
+
+### Comments
+
+#### Create Comment (Requires Authentication)
+
+```bash
+POST /api/posts/:post_id/comments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "content": "Great post! Thanks for sharing."
+}
+```
+
+Response (201 Created):
+```json
+{
+  "id": "comment-uuid",
+  "content": "Great post! Thanks for sharing.",
+  "post_id": "post-uuid",
+  "author_id": "user-uuid",
+  "created_at": "2024-01-01T00:00:00Z"
+}
+```
+
+#### List Comments
+
+```bash
+GET /api/posts/:post_id/comments?limit=50&offset=0
+```
+
+Response:
+```json
+{
+  "comments": [...],
+  "count": 5
 }
 ```
 

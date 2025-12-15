@@ -1,4 +1,4 @@
-# Ferro Auth API Documentation
+# Ferro API Documentation
 
 ## Base URL
 ```
@@ -15,7 +15,9 @@ Authorization: Bearer <token>
 
 ## Endpoints
 
-### 1. Health Check
+### Authentication Endpoints
+
+#### 1. Health Check
 
 Check if the service is running and healthy.
 
@@ -37,7 +39,7 @@ curl http://localhost:8080/health
 
 ---
 
-### 2. Register User
+#### 2. Register User
 
 Register a new user account.
 
@@ -90,7 +92,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 
 ---
 
-### 3. Login User
+#### 3. Login User
 
 Authenticate an existing user.
 
@@ -139,6 +141,255 @@ curl -X POST http://localhost:8080/api/auth/login \
     "email": "user@example.com",
     "password": "securepass123"
   }'
+```
+
+---
+
+### Post Endpoints
+
+#### 4. Create Post
+
+Create a new post (requires authentication).
+
+**Endpoint:** `POST /api/posts`
+
+**Authentication:** Required
+
+**Request Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "title": "string",      // Max 200 characters
+  "content": "string"     // Required, any length
+}
+```
+
+**Response:**
+- Status: `201 Created`
+- Body:
+```json
+{
+  "id": "uuid",
+  "title": "string",
+  "content": "string",
+  "author_id": "uuid",
+  "created_at": "ISO8601 timestamp",
+  "updated_at": "ISO8601 timestamp"
+}
+```
+
+**Error Responses:**
+
+- `400 Bad Request` - Invalid input
+```json
+{
+  "error": "Post title cannot be empty"
+}
+```
+
+- `401 Unauthorized` - Missing or invalid token
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/api/posts \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "My First Post",
+    "content": "This is the content of my first post"
+  }'
+```
+
+---
+
+#### 5. Get Post
+
+Get a single post by ID.
+
+**Endpoint:** `GET /api/posts/:post_id`
+
+**Response:**
+- Status: `200 OK`
+- Body:
+```json
+{
+  "id": "uuid",
+  "title": "string",
+  "content": "string",
+  "author_id": "uuid",
+  "created_at": "ISO8601 timestamp",
+  "updated_at": "ISO8601 timestamp"
+}
+```
+
+**Error Responses:**
+
+- `404 Not Found` - Post not found
+```json
+{
+  "error": "Post not found"
+}
+```
+
+**Example:**
+```bash
+curl http://localhost:8080/api/posts/550e8400-e29b-41d4-a716-446655440000
+```
+
+---
+
+#### 6. List Posts
+
+List all posts with pagination.
+
+**Endpoint:** `GET /api/posts?limit=20&offset=0`
+
+**Query Parameters:**
+- `limit` (optional): Number of posts to return (default: 20)
+- `offset` (optional): Number of posts to skip (default: 0)
+
+**Response:**
+- Status: `200 OK`
+- Body:
+```json
+{
+  "posts": [
+    {
+      "id": "uuid",
+      "title": "string",
+      "content": "string",
+      "author_id": "uuid",
+      "created_at": "ISO8601 timestamp",
+      "updated_at": "ISO8601 timestamp"
+    }
+  ],
+  "count": 10
+}
+```
+
+**Note:** `count` represents the number of posts returned in the current page, not the total number of posts in the database.
+
+**Example:**
+```bash
+curl "http://localhost:8080/api/posts?limit=10&offset=0"
+```
+
+---
+
+### Comment Endpoints
+
+#### 7. Create Comment
+
+Create a new comment on a post (requires authentication).
+
+**Endpoint:** `POST /api/posts/:post_id/comments`
+
+**Authentication:** Required
+
+**Request Headers:**
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "content": "string"     // Required, max 2000 characters
+}
+```
+
+**Response:**
+- Status: `201 Created`
+- Body:
+```json
+{
+  "id": "uuid",
+  "content": "string",
+  "post_id": "uuid",
+  "author_id": "uuid",
+  "created_at": "ISO8601 timestamp"
+}
+```
+
+**Error Responses:**
+
+- `400 Bad Request` - Invalid input
+```json
+{
+  "error": "Comment content cannot be empty"
+}
+```
+
+- `401 Unauthorized` - Missing or invalid token
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+- `404 Not Found` - Post not found
+```json
+{
+  "error": "Post not found"
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/api/posts/550e8400-e29b-41d4-a716-446655440000/comments \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Great post! Thanks for sharing."
+  }'
+```
+
+---
+
+#### 8. List Comments
+
+List all comments for a post with pagination.
+
+**Endpoint:** `GET /api/posts/:post_id/comments?limit=50&offset=0`
+
+**Query Parameters:**
+- `limit` (optional): Number of comments to return (default: 50)
+- `offset` (optional): Number of comments to skip (default: 0)
+
+**Response:**
+- Status: `200 OK`
+- Body:
+```json
+{
+  "comments": [
+    {
+      "id": "uuid",
+      "content": "string",
+      "post_id": "uuid",
+      "author_id": "uuid",
+      "created_at": "ISO8601 timestamp"
+    }
+  ],
+  "count": 5
+}
+```
+
+**Note:** `count` represents the number of comments returned in the current page, not the total number of comments for the post.
+
+**Example:**
+```bash
+curl "http://localhost:8080/api/posts/550e8400-e29b-41d4-a716-446655440000/comments?limit=20&offset=0"
 ```
 
 ---
