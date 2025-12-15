@@ -23,7 +23,7 @@ thiserror = "1.0" # For libraries (domain, infra)
 anyhow = "1.0"    # For services (applications)
 
 # Web Framework
-axum = "0.7"
+axum = "0.8"
 
 # Utilities
 chrono = { version = "0.4", features = ["serde"] }     # Date and time handling

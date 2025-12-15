@@ -2,6 +2,7 @@
 
 mod adapters;
 mod config;
+mod graphql;
 mod handlers;
 mod middleware;
 
@@ -10,9 +11,10 @@ use anyhow::Result;
 use axum::{
     middleware as axum_middleware,
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 use config::Config;
+use graphql::{build_schema, graphql_handler, graphql_playground};
 use handlers::{
     create_comment_handler, create_post_handler, get_post_handler, health_handler,
     list_comments_handler, list_posts_handler, login_handler, register_handler,
@@ -78,13 +80,17 @@ async fn main() -> Result<()> {
         post_repository,
         comment_repository,
         password_hasher,
-        jwt_service,
+        jwt_service: jwt_service.clone(),
     };
+
+    // Build GraphQL schema
+    let schema = build_schema();
+    tracing::info!("GraphQL schema built successfully");
 
     // Build router with protected routes
     let protected_routes = Router::new()
         .route("/api/posts", post(create_post_handler))
-        .route("/api/posts/:post_id/comments", post(create_comment_handler))
+        .route("/api/posts/{post_id}/comments", post(create_comment_handler))
         .route_layer(axum_middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,
@@ -95,14 +101,20 @@ async fn main() -> Result<()> {
         .route("/api/auth/register", post(register_handler))
         .route("/api/auth/login", post(login_handler))
         .route("/api/posts", get(list_posts_handler))
-        .route("/api/posts/:post_id", get(get_post_handler))
-        .route("/api/posts/:post_id/comments", get(list_comments_handler))
+        .route("/api/posts/{post_id}", get(get_post_handler))
+        .route("/api/posts/{post_id}/comments", get(list_comments_handler))
+        // GraphQL endpoints
+        .route("/graphql", post(graphql_handler))
+        .route("/graphql/playground", get(graphql_playground))
+        .layer(Extension(schema))
         .merge(protected_routes)
         .with_state(state);
 
     // Start server
     let addr = config.server_address();
     tracing::info!("Server listening on {}", addr);
+    tracing::info!("GraphQL endpoint: http://{}/graphql", addr);
+    tracing::info!("GraphQL Playground: http://{}/graphql/playground", addr);
 
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(listener, app).await?;

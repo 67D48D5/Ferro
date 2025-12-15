@@ -9,6 +9,7 @@ A generic, high-performance backend server framework written in Rust.
 - **Posting and Comment System**: Full-featured blog/forum-style posting with threaded comments
 - **Type-Safe Database Operations**: PostgreSQL integration with SQLx
 - **RESTful API**: Built with Axum web framework
+- **GraphQL API**: Full GraphQL support with async-graphql and interactive playground
 - **JWT Authentication Middleware**: Secure protected endpoints
 - **Comprehensive Logging**: Structured logging with Tracing
 - **Async/Await**: Fully async runtime with Tokio
@@ -76,6 +77,30 @@ cargo run
 ```
 
 The server will start on `http://localhost:8080`
+
+## API Protocols
+
+Ferro supports both REST and GraphQL APIs:
+
+### REST API
+
+See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete REST API reference.
+
+### GraphQL API
+
+- **Endpoint**: `POST /graphql`
+- **Playground**: `GET /graphql/playground` (interactive API explorer)
+
+See [GRAPHQL_API.md](GRAPHQL_API.md) for complete GraphQL API documentation with examples.
+
+Quick GraphQL example:
+```bash
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ health }"}'
+```
+
+Visit http://localhost:8080/graphql/playground for an interactive GraphQL explorer.
 
 ## API Endpoints
 
