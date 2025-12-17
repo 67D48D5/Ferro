@@ -7,6 +7,8 @@ members = [
     "crates/domain",
     "crates/infrastructure",
     "services/auth",
+    "services/post",
+    "services/comment",
 ]
 
 # Dependency versions shared across the workspace.
