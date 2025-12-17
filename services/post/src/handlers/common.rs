@@ -1,4 +1,4 @@
-// services/auth/src/handlers/common.rs
+// services/post/src/handlers/common.rs
 
 use serde::Deserialize;
 

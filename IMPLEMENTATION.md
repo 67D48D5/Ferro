@@ -1,7 +1,7 @@
 # Ferro Backend Framework - Implementation Summary
 
 ## Overview
-This document provides a high-level overview of the production-ready backend framework implemented for Ferro, including authentication, posting, and commenting systems.
+This document provides a high-level overview of the production-ready backend framework implemented for Ferro, including authentication, posting, and commenting systems implemented as microservices.
 
 ## Architecture
 
@@ -28,37 +28,46 @@ This document provides a high-level overview of the production-ready backend fra
    - JWT token management
    - Adapts external tools to domain interfaces
 
-4. **Service Layer** (`services/auth`)
-   - HTTP API implementation with Axum
-   - JWT authentication middleware
-   - Request handlers and routing
-   - Configuration management
-   - Error handling and logging
+4. **Service Layer** (Microservices)
+   - **Auth Service** (`services/auth`, port 8080)
+     - User registration and login
+     - JWT token generation
+     - GraphQL API for authentication
+   - **Post Service** (`services/post`, port 8081)
+     - Post creation, retrieval, and listing
+     - JWT token verification for protected endpoints
+   - **Comment Service** (`services/comment`, port 8082)
+     - Comment creation and listing
+     - JWT token verification for protected endpoints
 
 ## Key Features
 
 ### Security
 - **Argon2 Password Hashing**: Industry-standard, memory-hard algorithm
-- **JWT Tokens**: Secure, stateless authentication
-- **Authentication Middleware**: Protects sensitive endpoints
+- **JWT Tokens**: Secure, stateless authentication across services
+- **Authentication Middleware**: Protects sensitive endpoints in each service
 - **Input Validation**: Email format, password strength, content validation
 - **SQL Injection Protection**: Parameterized queries throughout
 - **Foreign Key Constraints**: Database-level referential integrity
-- **Secret Management**: Environment-based configuration
+- **Secret Management**: Environment-based configuration per service
 
 ### API Endpoints
 
-#### Authentication
+#### Authentication Service (Port 8080)
 - `GET /health` - Health check
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User authentication
+- `POST /graphql` - GraphQL endpoint
+- `GET /graphql/playground` - GraphQL playground
 
-#### Posts
+#### Post Service (Port 8081)
+- `GET /health` - Health check
 - `POST /api/posts` - Create post (protected)
 - `GET /api/posts` - List posts (public)
 - `GET /api/posts/:id` - Get single post (public)
 
-#### Comments
+#### Comment Service (Port 8082)
+- `GET /health` - Health check
 - `POST /api/posts/:id/comments` - Create comment (protected)
 - `GET /api/posts/:id/comments` - List comments (public)
 
@@ -98,15 +107,31 @@ This document provides a high-level overview of the production-ready backend fra
 # Start PostgreSQL
 docker-compose up -d
 
-# Copy environment template
-cp .env.example .env
+# Copy environment template (do this for each service)
+cp .env.example services/auth/.env
+cp .env.example services/post/.env
+cp .env.example services/comment/.env
+
+# Update port numbers in each .env file:
+# - services/auth/.env: SERVER_PORT=8080
+# - services/post/.env: SERVER_PORT=8081
+# - services/comment/.env: SERVER_PORT=8082
 
 # Build and test
 cargo build
 cargo test
 
-# Run service
+# Run services (in separate terminals)
+# Terminal 1:
 cd services/auth
+cargo run
+
+# Terminal 2:
+cd services/post
+cargo run
+
+# Terminal 3:
+cd services/comment
 cargo run
 ```
 

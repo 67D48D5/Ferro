@@ -1,4 +1,4 @@
-// services/auth/src/handlers/comment_handlers.rs
+// services/comment/src/handlers/comment_handlers.rs
 
 use application::comments::{
     CreateCommentRequest, CreateCommentUseCase, ListCommentsUseCase,
@@ -14,6 +14,14 @@ use uuid::Uuid;
 use super::common::PaginationParams;
 use super::error_response::AppError;
 use crate::{middleware::AuthUser, AppState};
+
+/// Health check endpoint
+pub async fn health_handler() -> Json<Value> {
+    Json(json!({
+        "status": "healthy",
+        "service": "comment"
+    }))
+}
 
 /// Create a new comment on a post
 pub async fn create_comment_handler(

@@ -1,4 +1,4 @@
-// services/auth/src/handlers/post_handlers.rs
+// services/post/src/handlers/post_handlers.rs
 
 use application::posts::{
     CreatePostRequest, CreatePostUseCase, GetPostUseCase, ListPostsUseCase,
@@ -14,6 +14,14 @@ use uuid::Uuid;
 use super::common::PaginationParams;
 use super::error_response::AppError;
 use crate::{middleware::AuthUser, AppState};
+
+/// Health check endpoint
+pub async fn health_handler() -> Json<Value> {
+    Json(json!({
+        "status": "healthy",
+        "service": "post"
+    }))
+}
 
 /// Create a new post
 pub async fn create_post_handler(
