@@ -23,9 +23,21 @@ ferro/
 │   ├── application/      # Use cases and application services
 │   └── infrastructure/   # External services (database, security)
 ├── services/
-│   └── auth/            # HTTP API service
-└── migrations/          # Database migrations
+│   ├── auth/             # Authentication service (port 8080)
+│   ├── post/             # Post management service (port 8081)
+│   └── comment/          # Comment management service (port 8082)
+└── migrations/           # Database migrations
 ```
+
+## Microservices
+
+Ferro implements a microservices architecture with three independent services:
+
+1. **Auth Service** (port 8080): User registration, login, and JWT token generation
+2. **Post Service** (port 8081): Post creation, retrieval, and listing
+3. **Comment Service** (port 8082): Comment creation and listing on posts
+
+Each service can be run independently and shares the same database.
 
 ## Getting Started
 
@@ -47,8 +59,9 @@ docker run --name ferro-postgres \
 
 ### Environment Variables
 
-Create a `.env` file in the `services/auth` directory:
+Each service requires environment variables. Create a `.env` file in each service directory:
 
+**Auth Service** (`services/auth/.env`):
 ```env
 # Database
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/ferro
@@ -62,34 +75,81 @@ SERVER_HOST=0.0.0.0
 SERVER_PORT=8080
 ```
 
+**Post Service** (`services/post/.env`):
+```env
+# Database
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/ferro
+
+# JWT Configuration (for token verification)
+JWT_SECRET=your-secret-key-change-this-in-production
+
+# Server Configuration
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8081
+```
+
+**Comment Service** (`services/comment/.env`):
+```env
+# Database
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/ferro
+
+# JWT Configuration (for token verification)
+JWT_SECRET=your-secret-key-change-this-in-production
+
+# Server Configuration
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8082
+```
+
 ### Build and Run
 
 ```bash
-# Build all crates
+# Build all services
 cargo build
 
 # Run tests
 cargo test
 
-# Run the auth service
+# Run each service in separate terminals:
+
+# Terminal 1: Auth service
 cd services/auth
+cargo run
+
+# Terminal 2: Post service
+cd services/post
+cargo run
+
+# Terminal 3: Comment service
+cd services/comment
 cargo run
 ```
 
-The server will start on `http://localhost:8080`
+The services will start on:
+- Auth service: `http://localhost:8080`
+- Post service: `http://localhost:8081`
+- Comment service: `http://localhost:8082`
 
 ## API Protocols
 
-Ferro supports both REST and GraphQL APIs:
+Ferro supports both REST and GraphQL APIs.
 
 ### REST API
+
+Each service exposes its own REST API endpoints:
+
+- **Auth Service** (localhost:8080): Authentication endpoints
+- **Post Service** (localhost:8081): Post management endpoints
+- **Comment Service** (localhost:8082): Comment management endpoints
 
 See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete REST API reference.
 
 ### GraphQL API
 
-- **Endpoint**: `POST /graphql`
-- **Playground**: `GET /graphql/playground` (interactive API explorer)
+The Auth service also provides a GraphQL API for authentication:
+
+- **Endpoint**: `POST http://localhost:8080/graphql`
+- **Playground**: `GET http://localhost:8080/graphql/playground` (interactive API explorer)
 
 See [GRAPHQL_API.md](GRAPHQL_API.md) for complete GraphQL API documentation with examples.
 
@@ -104,12 +164,12 @@ Visit http://localhost:8080/graphql/playground for an interactive GraphQL explor
 
 ## API Endpoints
 
-### Authentication
+### Authentication Service (Port 8080)
 
 #### Health Check
 
 ```bash
-GET /health
+GET http://localhost:8080/health
 ```
 
 Response:
@@ -122,7 +182,7 @@ Response:
 #### Register User
 
 ```bash
-POST /api/auth/register
+POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
@@ -143,7 +203,7 @@ Response (201 Created):
 #### Login User
 
 ```bash
-POST /api/auth/login
+POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
@@ -161,12 +221,12 @@ Response (200 OK):
 }
 ```
 
-### Posts
+### Post Service (Port 8081)
 
 #### Create Post (Requires Authentication)
 
 ```bash
-POST /api/posts
+POST http://localhost:8081/api/posts
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -191,13 +251,13 @@ Response (201 Created):
 #### Get Post
 
 ```bash
-GET /api/posts/:post_id
+GET http://localhost:8081/api/posts/:post_id
 ```
 
 #### List Posts
 
 ```bash
-GET /api/posts?limit=20&offset=0
+GET http://localhost:8081/api/posts?limit=20&offset=0
 ```
 
 Response:
@@ -208,12 +268,12 @@ Response:
 }
 ```
 
-### Comments
+### Comment Service (Port 8082)
 
 #### Create Comment (Requires Authentication)
 
 ```bash
-POST /api/posts/:post_id/comments
+POST http://localhost:8082/api/posts/:post_id/comments
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -236,7 +296,7 @@ Response (201 Created):
 #### List Comments
 
 ```bash
-GET /api/posts/:post_id/comments?limit=50&offset=0
+GET http://localhost:8082/api/posts/:post_id/comments?limit=50&offset=0
 ```
 
 Response:
@@ -297,25 +357,42 @@ cargo test -p infrastructure
 ## Project Structure
 
 ### Domain Layer (`crates/domain`)
-- **Entities**: User aggregate
+- **Entities**: User, Post, Comment aggregates
 - **Value Objects**: Email, PasswordHash, PlainPassword
-- **Repository Interfaces**: UserRepository, PasswordHasher
+- **Repository Interfaces**: UserRepository, PostRepository, CommentRepository, PasswordHasher
 - **Domain Errors**: Validation, AlreadyExists, NotFound, InfraError
 
 ### Application Layer (`crates/application`)
-- **Use Cases**: RegisterUserUseCase, LoginUserUseCase
+- **Use Cases**: 
+  - User: RegisterUserUseCase, LoginUserUseCase
+  - Post: CreatePostUseCase, GetPostUseCase, ListPostsUseCase
+  - Comment: CreateCommentUseCase, ListCommentsUseCase
 - **DTOs**: Request and Response data transfer objects
 - **Traits**: TokenGenerator, PasswordVerifier
 
 ### Infrastructure Layer (`crates/infrastructure`)
-- **Persistence**: PostgreSQL implementation of UserRepository
+- **Persistence**: PostgreSQL implementation of repositories (User, Post, Comment)
 - **Security**: Argon2 password hasher, JWT service
 
-### Service Layer (`services/auth`)
-- **HTTP API**: Axum web server with REST endpoints
-- **Configuration**: Environment-based configuration
-- **Error Handling**: HTTP error responses
-- **Adapters**: Bridges between application and infrastructure
+### Service Layer (Microservices)
+
+#### Auth Service (`services/auth`)
+- **Port**: 8080
+- **Purpose**: User authentication and JWT token management
+- **Endpoints**: Register, Login, GraphQL
+- **Authentication**: Generates JWT tokens
+
+#### Post Service (`services/post`)
+- **Port**: 8081
+- **Purpose**: Post creation, retrieval, and listing
+- **Endpoints**: Create post (protected), Get post, List posts
+- **Authentication**: Validates JWT tokens for protected endpoints
+
+#### Comment Service (`services/comment`)
+- **Port**: 8082
+- **Purpose**: Comment creation and listing
+- **Endpoints**: Create comment (protected), List comments
+- **Authentication**: Validates JWT tokens for protected endpoints
 
 ## Development
 
